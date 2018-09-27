@@ -5,25 +5,26 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 
-import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.UnhandledAlertException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.hitachi.utils.PropertiesUtils;
 
@@ -95,7 +96,7 @@ public class ScreenShotWithXpath {
 
         try {
             login(driver, "JC00000013", "Passw0rd");
-            gotoTargetPage2(driver, steps, fileName,count);
+            gotoTargetPage2(driver, steps, fileName, count);
             logout(driver);
 
         } catch (Exception e) {
@@ -124,20 +125,33 @@ public class ScreenShotWithXpath {
         }
         Thread.sleep(2000);
         driver.findElementByXPath("//input[@value='コリンズ']").click();
-        Thread.sleep(2000);
     }
 
-    private static void gotoTargetPage2(RemoteWebDriver driver, String[] steps, String fileName,int index)
+    private static void gotoTargetPage2(RemoteWebDriver driver, String[] steps, String fileName, int index)
             throws InterruptedException, IOException {
         for (String step : steps) {
-            while (driver.getPageSource().equals("")) {
-                Thread.sleep(1000);
-            }
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+             wait.until(new ExpectedCondition<WebElement>() {
+
+                 @Override
+                 public WebElement apply(WebDriver input) {
+                     // TODO 自動生成されたメソッド・スタブ
+                     WebElement element = null;
+                     try {
+                         element = input.findElements(By.xpath("//a")).get(0);
+                     } catch (UnhandledAlertException e) {
+                         input.switchTo().alert().accept();
+                     }
+                     return element;
+                 }
+             });
+
             oneStep(driver, step);
         }
 
-        driver.findElementsByXPath("//td[@class='pankuzu']//a").get(index).click();;
-        screenShot(driver, fileName+"_"+index);
+        driver.findElementsByXPath("//td[@class='pankuzu']//a").get(index).click();
+        ;
+        screenShot(driver, fileName + "_" + index);
 
         if (driver.getWindowHandles().size() > 1) {
             driver = (RemoteWebDriver) driver.switchTo().window((String) driver.getWindowHandles().toArray()[0]);
@@ -147,9 +161,25 @@ public class ScreenShotWithXpath {
     private static void gotoTargetPage(RemoteWebDriver driver, String[] steps, String fileName)
             throws InterruptedException, IOException {
         for (String step : steps) {
-            while (driver.getPageSource().equals("")) {
-                Thread.sleep(1000);
-            }
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(new ExpectedCondition<WebElement>() {
+
+                @Override
+                public WebElement apply(WebDriver input) {
+                    // TODO 自動生成されたメソッド・スタブ
+                    WebElement element = null;
+                    try {
+                        element = input.findElements(By.xpath("//a")).get(0);
+                    } catch (UnhandledAlertException e) {
+                        input.switchTo().alert().accept();
+                    }
+                    return element;
+                }
+
+            });
+            //            while (driver.getPageSource().equals("")) {
+            //                Thread.sleep(300);
+            //            }
             oneStep(driver, step);
         }
         screenShot(driver, fileName);
@@ -163,9 +193,7 @@ public class ScreenShotWithXpath {
         WebElement element;
         String op = step.split(":")[0];
         if (step.split(":").length > 1) {
-
             element = findElement(driver, step, 0);
-
         } else {
             if (step.startsWith("switch")) {
                 String switchTo = "";
@@ -182,7 +210,7 @@ public class ScreenShotWithXpath {
                 driver.executeScript("window.confirm = function(msg){return true;}");
             }
             if (step.startsWith("alert")) {
-                driver.switchTo().alert().accept();
+//                driver.switchTo().alert().accept();
             }
             element = null;
         }
@@ -240,7 +268,7 @@ public class ScreenShotWithXpath {
         }
     }
 
-    private static void writeLog(String content) throws IOException {
+    public static void writeLog(String content) throws IOException {
         FileWriter writer = new FileWriter(new File("D:\\test.log"), true);
         writer.write(content + "\n");
         writer.close();

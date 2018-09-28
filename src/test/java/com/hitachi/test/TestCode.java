@@ -12,20 +12,12 @@ import org.apache.tools.ant.util.FileUtils;
 
 public class TestCode {
     public static void main(String[] args) {
-        File file = new File("D:\\evidence_layout");
+        File file = new File("D:\\evidence");
         File[] dirs = file.listFiles();
         for (File dir : dirs) {
             for (File layout : dir.listFiles()) {
-                if (layout.getName().endsWith("png")) {
-                    try {
-                        copy(layout, new File(file.getAbsolutePath() + "\\" + dir.getName() + "_" + layout.getName()));
-                    } catch (FileNotFoundException e) {
-                        // TODO 自動生成された catch ブロック
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        // TODO 自動生成された catch ブロック
-                        e.printStackTrace();
-                    }
+                if (layout.getName().endsWith("xls")) {
+                       layout.delete();
                 }
             }
         }

@@ -10,7 +10,6 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.NoSuchElementException;
@@ -46,7 +45,7 @@ public class ScreenShotWithXpath {
             for (ResourceBundle res : resources) {
                 resource = res;
                 System.out.println(resource.getBaseBundleName());
-                File dir = new File("D:\\evidence_pankuzu\\" + resource.getBaseBundleName());
+                File dir = new File("D:\\evidence\\" + resource.getBaseBundleName());
                 if (!dir.exists()) {
                     dir.mkdir();
                 }
@@ -72,11 +71,11 @@ public class ScreenShotWithXpath {
     }
 
     public static void getImage(RemoteWebDriver driver, String[] steps, String fileName) throws Exception {
-        int size = 0;
+//        int size = 0;
         try {
             login(driver, "JC00000013", "Passw0rd");
             gotoTargetPage(driver, steps, fileName);
-            size = driver.findElementsByXPath("//td[@class='pankuzu']//a").size();
+//            size = driver.findElementsByXPath("//td[@class='pankuzu']//a").size();
             logout(driver);
 
         } catch (Exception e) {
@@ -85,11 +84,11 @@ public class ScreenShotWithXpath {
         } finally {
             driver.quit();
         }
-        for (int i = 0; i < size; i++) {
-            ChromeDriver driver1 = new ChromeDriver();
-            driver1.manage().window().setSize(new Dimension(1920, 8000));
-            getImage(driver1, steps, fileName, i);
-        }
+//        for (int i = 0; i < size; i++) {
+//            ChromeDriver driver1 = new ChromeDriver();
+//            driver1.manage().window().setSize(new Dimension(1920, 8000));
+//            getImage(driver1, steps, fileName, i);
+//        }
     }
 
     public static void getImage(RemoteWebDriver driver, String[] steps, String fileName, int count) throws Exception {
@@ -129,28 +128,16 @@ public class ScreenShotWithXpath {
 
     private static void gotoTargetPage2(RemoteWebDriver driver, String[] steps, String fileName, int index)
             throws InterruptedException, IOException {
+        System.out.println(index);
         for (String step : steps) {
-            WebDriverWait wait = new WebDriverWait(driver, 10);
-             wait.until(new ExpectedCondition<WebElement>() {
-
-                 @Override
-                 public WebElement apply(WebDriver input) {
-                     // TODO 自動生成されたメソッド・スタブ
-                     WebElement element = null;
-                     try {
-                         element = input.findElements(By.xpath("//a")).get(0);
-                     } catch (UnhandledAlertException e) {
-                         input.switchTo().alert().accept();
-                     }
-                     return element;
-                 }
-             });
-
             oneStep(driver, step);
         }
-
-        driver.findElementsByXPath("//td[@class='pankuzu']//a").get(index).click();
-        ;
+        try {
+            driver.findElementsByXPath("//td[@class='pankuzu']//a").get(index).click();
+        } catch (UnhandledAlertException e) {
+            driver.switchTo().alert().accept();
+            driver.findElementsByXPath("//td[@class='pankuzu']//a").get(index).click();
+        }
         screenShot(driver, fileName + "_" + index);
 
         if (driver.getWindowHandles().size() > 1) {
@@ -161,25 +148,6 @@ public class ScreenShotWithXpath {
     private static void gotoTargetPage(RemoteWebDriver driver, String[] steps, String fileName)
             throws InterruptedException, IOException {
         for (String step : steps) {
-            WebDriverWait wait = new WebDriverWait(driver, 10);
-            wait.until(new ExpectedCondition<WebElement>() {
-
-                @Override
-                public WebElement apply(WebDriver input) {
-                    // TODO 自動生成されたメソッド・スタブ
-                    WebElement element = null;
-                    try {
-                        element = input.findElements(By.xpath("//a")).get(0);
-                    } catch (UnhandledAlertException e) {
-                        input.switchTo().alert().accept();
-                    }
-                    return element;
-                }
-
-            });
-            //            while (driver.getPageSource().equals("")) {
-            //                Thread.sleep(300);
-            //            }
             oneStep(driver, step);
         }
         screenShot(driver, fileName);
@@ -210,29 +178,65 @@ public class ScreenShotWithXpath {
                 driver.executeScript("window.confirm = function(msg){return true;}");
             }
             if (step.startsWith("alert")) {
-//                driver.switchTo().alert().accept();
+                //                driver.switchTo().alert().accept();
             }
             element = null;
         }
         executeOperation(element, op);
+        try {
+            driver.switchTo().alert().accept();
+        } catch (Exception e) {
+        }
     }
 
     private static WebElement findElement(RemoteWebDriver driver, String step, int retry) throws InterruptedException {
         WebElement element = null;
         String xpath = step.split(":")[1];
         try {
+            WebDriverWait wait = new WebDriverWait(driver, 10);
             if (step.split(":").length == 3) {
-                element = driver.findElementsByXPath(xpath).get(Integer.parseInt(step.split(":")[2]));
+                element = wait.until(new ExpectedCondition<WebElement>() {
+                    @Override
+                    public WebElement apply(WebDriver input) {
+                        // TODO 自動生成されたメソッド・スタブ
+                        WebElement element = null;
+                        try {
+                            List<WebElement> elements =  driver.findElementsByXPath(xpath);
+                            if(elements.size()<=Integer.parseInt(step.split(":")[2])){
+                                throw new NoSuchElementException("No Such Index");
+                            }
+                            element = elements.get(Integer.parseInt(step.split(":")[2]));
+                        } catch (UnhandledAlertException e) {
+                            input.switchTo().alert().accept();
+                        }
+                        return element;
+                    }
+                });
             } else {
-                element = driver.findElementByXPath(xpath);
+                element = wait.until(new ExpectedCondition<WebElement>() {
+                    @Override
+                    public WebElement apply(WebDriver input) {
+                        // TODO 自動生成されたメソッド・スタブ
+                        WebElement element = null;
+                        try {
+                            element = driver.findElementByXPath(xpath);
+                        } catch (UnhandledAlertException e) {
+                            input.switchTo().alert().accept();
+                        }
+                        return element;
+                    }
+                });
             }
         } catch (ElementNotVisibleException | NoSuchElementException e) {
             Thread.sleep(2000);
             if (retry < 3) {
-                findElement(driver, step, retry++);
+                element = findElement(driver, step, retry++);
             } else {
                 throw e;
             }
+        }catch (UnhandledAlertException e){
+            driver.switchTo().alert().accept();
+            element = findElement(driver, step, retry++);
         }
         return element;
     }
@@ -264,7 +268,6 @@ public class ScreenShotWithXpath {
                 Select select = new Select(element);
                 select.selectByIndex(Integer.parseInt(op.substring(op.indexOf("(") + 1, op.indexOf(")"))));
             }
-            //            Thread.sleep(2000);
         }
     }
 

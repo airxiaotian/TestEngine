@@ -45,7 +45,7 @@ public class ScreenShotWithXpath {
             for (ResourceBundle res : resources) {
                 resource = res;
                 System.out.println(resource.getBaseBundleName());
-                File dir = new File("D:\\evidence\\" + resource.getBaseBundleName());
+                File dir = new File("D:\\evidence_new\\" + resource.getBaseBundleName());
                 if (!dir.exists()) {
                     dir.mkdir();
                 }

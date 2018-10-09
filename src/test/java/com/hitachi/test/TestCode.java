@@ -4,20 +4,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-
-import org.apache.tools.ant.util.FileUtils;
 
 public class TestCode {
     public static void main(String[] args) {
-        File file = new File("D:\\evidence");
+        File file = new File("D:\\evidence_new");
         File[] dirs = file.listFiles();
         for (File dir : dirs) {
             for (File layout : dir.listFiles()) {
-                if (layout.getName().endsWith("xls")) {
-                       layout.delete();
+                if (layout.getName().endsWith("png")) {
+                    File newFile = new File(file.getAbsolutePath() + "\\" + layout.getName());
+                    try {
+                        copy(layout, newFile);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

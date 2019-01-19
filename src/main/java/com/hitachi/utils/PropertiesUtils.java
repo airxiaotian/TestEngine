@@ -12,9 +12,14 @@ public class PropertiesUtils {
         List<ResourceBundle> resources = new LinkedList<ResourceBundle>();
         for (File file : dir.listFiles()) {
             if (file.getName().endsWith(".properties")) {
-                resources.add(ResourceBundle.getBundle(file.getName().substring(0,file.getName().indexOf(".")), Locale.JAPANESE));
+                resources.add(ResourceBundle.getBundle(file.getName().substring(0, file.getName().indexOf(".")),
+                        Locale.JAPANESE));
             }
         }
         return resources;
+    }
+
+    public static ResourceBundle getProperties(String name) {
+        return ResourceBundle.getBundle(name);
     }
 }
